@@ -1,0 +1,471 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAX Password Generator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #111214;
+    color: #e8e8e8;
+    font-family: Arial, sans-serif;
+    padding: 40px 15px;
+}
+
+.container {
+    max-width: 650px;
+    margin: auto;
+}
+
+.header {
+    border-bottom: 1px solid #303136;
+    padding-bottom: 18px;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 25px;
+    margin: 0 0 7px;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: #888;
+    font-size: 13px;
+}
+
+.section {
+    background: #191a1e;
+    border: 1px solid #303136;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.section-title {
+    font-size: 13px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 17px;
+}
+
+.password-output {
+    display: flex;
+    gap: 8px;
+}
+
+input, button {
+    font: inherit;
+}
+
+#password {
+    flex: 1;
+    min-width: 0;
+    background: #101114;
+    color: #a6e3a1;
+    border: 1px solid #33353b;
+    padding: 13px;
+    font-family: monospace;
+    font-size: 15px;
+}
+
+button {
+    cursor: pointer;
+    border: 1px solid #393a40;
+    background: #292a30;
+    color: white;
+    padding: 10px 15px;
+}
+
+button:hover {
+    background: #393a42;
+}
+
+.generate {
+    background: #e5e5e5;
+    color: #111;
+    border: none;
+    width: 100%;
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.generate:hover {
+    background: #fff;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 14px 0;
+    font-size: 14px;
+    gap: 15px;
+}
+
+input[type="checkbox"] {
+    accent-color: #a6e3a1;
+    width: 16px;
+    height: 16px;
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: #a6e3a1;
+}
+
+input[type="number"], input[type="text"] {
+    background: #101114;
+    color: white;
+    border: 1px solid #393a40;
+    padding: 9px;
+    width: 110px;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+}
+
+.strength {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #999;
+}
+
+.bar {
+    height: 5px;
+    background: #333;
+    margin-top: 8px;
+}
+
+#strengthBar {
+    height: 100%;
+    width: 0;
+    transition: .2s;
+    background: #a6e3a1;
+}
+
+#strengthText {
+    margin-top: 6px;
+}
+
+.results {
+    margin-top: 12px;
+}
+
+.result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-bottom: 1px solid #303136;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.result span {
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+.result button {
+    font-family: Arial;
+    font-size: 11px;
+}
+
+.footer {
+    text-align: center;
+    color: #777;
+    font-size: 12px;
+    margin-top: 25px;
+}
+
+.footer strong {
+    color: #ddd;
+}
+
+@media(max-width: 450px) {
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+    <h1>MAX Password Generator</h1>
+    <div class="subtitle">Simple. Random. Secure.</div>
+</div>
+
+<div class="section">
+    <div class="section-title">Generated password</div>
+
+    <div class="password-output">
+        <input id="password" readonly placeholder="Generate a password">
+        <button onclick="copyMain()">Copy</button>
+    </div>
+
+    <div class="strength">
+        <div id="strengthText">Strength: Not generated</div>
+        <div class="bar">
+            <div id="strengthBar"></div>
+        </div>
+    </div>
+
+    <button class="generate" onclick="generate()">GENERATE PASSWORD</button>
+</div>
+
+<div class="section">
+
+    <div class="section-title">Password settings</div>
+
+    <div class="row">
+        <label>Password length</label>
+        <strong id="lengthText">20</strong>
+    </div>
+
+    <input type="range" id="length" min="4" max="128" value="20"
+    oninput="lengthText.textContent=this.value">
+
+    <div class="options-grid">
+
+        <div class="row">
+            <label>Uppercase letters</label>
+            <input type="checkbox" id="upper" checked>
+        </div>
+
+        <div class="row">
+            <label>Lowercase letters</label>
+            <input type="checkbox" id="lower" checked>
+        </div>
+
+        <div class="row">
+            <label>Numbers</label>
+            <input type="checkbox" id="numbers" checked>
+        </div>
+
+        <div class="row">
+            <label>Symbols</label>
+            <input type="checkbox" id="symbols" checked>
+        </div>
+
+        <div class="row">
+            <label>Exclude similar characters</label>
+            <input type="checkbox" id="similar">
+        </div>
+
+        <div class="row">
+            <label>Exclude brackets</label>
+            <input type="checkbox" id="brackets">
+        </div>
+
+    </div>
+
+    <div class="row">
+        <label>Custom symbols</label>
+        <input type="text" id="customSymbols" placeholder="!@#$%^&*">
+    </div>
+
+</div>
+
+<div class="section">
+
+    <div class="section-title">Advanced options</div>
+
+    <div class="row">
+        <label>Number of passwords</label>
+        <input type="number" id="quantity" min="1" max="20" value="5">
+    </div>
+
+    <div class="row">
+        <label>Include at least one of each selected type</label>
+        <input type="checkbox" id="guarantee" checked>
+    </div>
+
+    <div class="row">
+        <label>Automatically copy first password</label>
+        <input type="checkbox" id="autoCopy">
+    </div>
+
+</div>
+
+<div class="section">
+    <div class="section-title">Generated passwords</div>
+    <div id="results" class="results">
+        <div class="subtitle">Your passwords will appear here.</div>
+    </div>
+</div>
+
+<div class="footer">
+    Made by <strong>MAX</strong>
+</div>
+
+</div>
+
+<script>
+
+function randomNumber(max) {
+    const limit = Math.floor(4294967296 / max) * max;
+    const array = new Uint32Array(1);
+    do {
+        crypto.getRandomValues(array);
+    } while (array[0] >= limit);
+    return array[0] % max;
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = randomNumber(i + 1);
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function generateOne() {
+
+    let groups = [];
+
+    if (upper.checked)
+        groups.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+    if (lower.checked)
+        groups.push("abcdefghijklmnopqrstuvwxyz");
+
+    if (numbers.checked)
+        groups.push("0123456789");
+
+    if (symbols.checked)
+        groups.push(customSymbols.value || "!@#$%^&*_-+=");
+
+    if (groups.length === 0) {
+        alert("Select at least one character type.");
+        return null;
+    }
+
+    const length = Number(document.getElementById("length").value);
+
+    if (guarantee.checked && length < groups.length) {
+        alert("Password length must fit every selected character type.");
+        return null;
+    }
+
+    if (similar.checked) {
+        groups = groups.map(g => g.replace(/[il1Lo0O]/g, ""));
+    }
+
+    if (brackets.checked) {
+        groups = groups.map(g => g.replace(/[()[\]{}<>]/g, ""));
+    }
+
+    if (groups.some(g => g.length === 0)) {
+        alert("One of your selected character groups is empty.");
+        return null;
+    }
+
+    let all = groups.join("");
+    let chars = [];
+
+    if (guarantee.checked) {
+        groups.forEach(group => {
+            chars.push(group[randomNumber(group.length)]);
+        });
+    }
+
+    while (chars.length < length) {
+        chars.push(all[randomNumber(all.length)]);
+    }
+
+    return shuffle(chars).join("");
+}
+
+function strengthScore(password) {
+    let score = 0;
+
+    if (password.length >= 12) score++;
+    if (password.length >= 20) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+    return score;
+}
+
+function generate() {
+
+    const count = Math.max(1, Math.min(20, Number(quantity.value) || 1));
+    quantity.value = count;
+
+    const first = generateOne();
+    if (first === null) return;
+
+    let passwords = [first];
+
+    for (let i = 1; i < count; i++) {
+        const p = generateOne();
+        if (p === null) return;
+        passwords.push(p);
+    }
+
+    document.getElementById("password").value = first;
+
+    const score = strengthScore(first);
+    const labels = ["Very weak", "Weak", "Fair", "Good", "Strong", "Very strong", "Excellent"];
+
+    document.getElementById("strengthText").textContent =
+        "Strength: " + labels[score];
+
+    document.getElementById("strengthBar").style.width =
+        ((score + 1) / 7 * 100) + "%";
+
+    document.getElementById("results").innerHTML = "";
+
+    passwords.forEach(password => {
+        const div = document.createElement("div");
+        div.className = "result";
+
+        const span = document.createElement("span");
+        span.textContent = password;
+
+        const button = document.createElement("button");
+        button.textContent = "COPY";
+        button.onclick = () => copyText(password);
+
+        div.appendChild(span);
+        div.appendChild(button);
+
+        document.getElementById("results").appendChild(div);
+    });
+
+    if (autoCopy.checked) copyText(first);
+}
+
+function copyText(text) {
+    navigator.clipboard.writeText(text).then(
+        () => alert("Password copied!"),
+        () => alert("Copy failed. Try selecting the password manually.")
+    );
+}
+
+function copyMain() {
+    const password = document.getElementById("password").value;
+    if (password) copyText(password);
+}
+
+</script>
+
+</body>
+</html>
